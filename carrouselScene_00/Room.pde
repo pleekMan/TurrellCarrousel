@@ -1,7 +1,7 @@
 class Room {
 
   PGraphics drawBuffer;
-  PGraphics floorBuffer;
+  //PGraphics floorBuffer;
   
   float rotation;
   float rotationVel;
@@ -17,8 +17,8 @@ class Room {
     pos = new PVector();
     size = new PVector();
 
-    drawBuffer = createGraphics((int)galleryRadius * 2, (int)galleryHeight * 2, P2D);
-    floorBuffer = createGraphics(drawBuffer.width, drawBuffer.width, P2D);
+    drawBuffer = createGraphics((int)galleryRadius * 2, (int)galleryRadius * 2, P2D);
+    //floorBuffer = createGraphics(drawBuffer.width, drawBuffer.width, P2D);
   }
 
   void update() {
@@ -26,7 +26,7 @@ class Room {
     drawBuffer.beginDraw();
     drawBuffer.background(50);
 
-    drawBuffer.translate(0, drawBuffer.height);
+    drawBuffer.translate(drawBuffer.width * 0.5, drawBuffer.height * 0.5);
     drawBuffer.rotate(((sin(frameCount * 0.01) + 1) * 0.5) * TWO_PI);
     drawBuffer.translate(-50, -50);
     drawBuffer.rect(0, 0, drawBuffer.height, drawBuffer.height); // BOTTOM LEFT CORNER
