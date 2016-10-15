@@ -20,6 +20,7 @@ boolean doRotate;
 void setup() {
   size(1024, 768, P3D);
   frameRate(30);
+  textureMode(NORMAL);
 
   camera = new PeasyCam(this, 500);
   camera.setMinimumDistance(10);
@@ -46,16 +47,14 @@ void draw() {
   background(25);
 
 
-  //graphic1.update();
-  drawTops();
+  //drawTops();
   room1.update();
   room1.render();
 
   //drawWalls(center, 100, 50, 5);
-  drawAxisGizmo(0, 0, 0, 50);
+  drawAxisGizmo(0, -150, 0, 50);
 
   //text(nf(carrouselRotation  % TWO_PI,0,2),0, -60);
-  //image(graphic1.getGraphic(), 0, -100);
 
 }
 
@@ -202,6 +201,7 @@ void keyPressed() {
 
   if (key == 'i') {
     rotDirection *= -1;
+    room1.setDirection((int)rotDirection);
   }
 }
 
