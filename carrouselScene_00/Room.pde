@@ -10,6 +10,10 @@ class Room {
   PVector pos;
   PVector size;
 
+  boolean isActive;
+  boolean paused = false;
+  boolean changedGraphics = false;
+
   Room(int _roomID) {
 
     id = _roomID;
@@ -23,27 +27,82 @@ class Room {
 
   void update() {
     // WALLS BUFFER
+    /*
     drawBuffer.beginDraw();
-    drawBuffer.background(50);
-
-    /* ROTATING SQUARE
+     drawBuffer.background(50);
+     
+     
+     
+     drawBuffer.rectMode(CENTER);
+     drawBuffer.fill(0, 255, 255);
+     drawBuffer.rect(drawBuffer.width * 0.5, drawBuffer.height * 0.5, 200, 200);
+     drawBuffer.rectMode(CORNER);
+     
+     drawBuffer.fill(255, 0, 0);
+     drawBuffer.stroke(255, 0, 0);
+     
+     drawBuffer.textSize(30);
+     drawBuffer.text(id, 100, 100);
+     
+     // ROTATING SQUARE
+     
      drawBuffer.translate(drawBuffer.width * 0.5, drawBuffer.height * 0.5);
      drawBuffer.rotate(((sin(frameCount * 0.01) + 1) * 0.5) * TWO_PI);
      drawBuffer.translate(-50, -50);
      drawBuffer.rect(0, 0, 100,100); // BOTTOM LEFT CORNER
+     
+     
+     drawBuffer.endDraw();
      */
 
+    if (!paused)rotation += rotationVel;
+
+    checkActive();
+  }
+
+  boolean checkActive() {
+
+    if (abs((rotation % TWO_PI)) < abs((slitStart % TWO_PI)) && abs((rotation % TWO_PI)) > abs((slitEnd % TWO_PI))) {
+      isActive = true;
+      if (!changedGraphics) {
+        changeGraphics();
+      }
+    } else {
+      isActive = false;    
+      changedGraphics = false;
+    }
+
+    return isActive;
+  }
+
+  void changeGraphics() {
+    drawBuffer.beginDraw();
+    drawBuffer.background(0);
+
+    int shapePoints = floor(random(5));
+    int limit = int(drawBuffer.width * 0.5);
+    drawBuffer.noStroke();
+    drawBuffer.fill(random(255), random(255), random(255));
+
     drawBuffer.rectMode(CENTER);
-    drawBuffer.fill(0, 255, 255);
-    drawBuffer.rect(drawBuffer.width * 0.5, drawBuffer.height * 0.5, 200, 200);
+    drawBuffer.rect(drawBuffer.width * 0.5, drawBuffer.height * 0.5, 100, 100);
     drawBuffer.rectMode(CORNER);
 
-    drawBuffer.fill(255, 0, 0);
-    drawBuffer.stroke(255, 0, 0);
+    /*
+    drawBuffer.beginShape();
+     
+     for (int i=0; i < shapePoints; i++) {
+     drawBuffer.vertex(drawBuffer.width * 0.5 + random(-limit, limit), drawBuffer.height * 0.5 + random(-limit, limit));
+     }
+     
+     drawBuffer.endShape();
+     */
 
-    drawBuffer.text(id, 100, 100);
 
     drawBuffer.endDraw();
+    changedGraphics = true;
+
+    println("ARTWORK ON ROOM " + id + " CHANGED");
   }
 
   void render() {
@@ -61,7 +120,7 @@ class Room {
     noFill();
     stroke(255, 255, 0);
     box(size.x, size.y, size.z);
-    text(id, size.x * 0.5, -(size.y * 0.5));
+    text(id + " | " + nf(abs((rotation % TWO_PI)), 0, 2), size.x * 0.5, -(size.y * 0.5));
 
     popMatrix();
 
@@ -107,7 +166,7 @@ class Room {
     //translate(0, -size.y, (size.z * 0.5) + 0.1);
     //image(drawBuffer, 0, 0, size.x, size.y);
 
-    float newWallZ = (size.z * 0.5) + 0.1;
+    //float newWallZ = (size.z * 0.5) + 0.1;
     beginShape();
     texture(drawBuffer);
     vertex(topOut.x, topOut.y, wallHalfWidthOffset, 0, 0);
@@ -124,7 +183,11 @@ class Room {
     PVector corner = new PVector(0 + wallHalfWidthOffset, 0, 0 + -wallHalfWidthOffset);
     PVector wall1 = new PVector(size.x, 0, 0 + -wallHalfWidthOffset);
     PVector wall2 = new PVector(0 + wallHalfWidthOffset, 0, -size.x);
-    fill(0, 200, 200);
+    if (isActive) {
+      fill(0, 200, 200);
+    } else {
+      fill(127);
+    }
     beginShape();
     texture(drawBuffer);
     vertex(corner.x, corner.y, corner.z, 0.5, 0.5);
@@ -134,8 +197,6 @@ class Room {
 
 
     popMatrix(); // ENDS GLOBAL WALL TRANSFORMS
-
-    rotation += rotationVel;
   }
 
   void setDirection(int dir) {
@@ -158,5 +219,9 @@ class Room {
     pos.set(_pos);
     rotation = initRotation;
     size.set(radius, wallHeight, wallWidth);
+  }
+
+  PImage getArtWork() {
+    return drawBuffer;
   }
 }

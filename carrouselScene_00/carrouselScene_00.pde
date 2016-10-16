@@ -52,105 +52,27 @@ void draw() {
   background(25);
 
 
-  drawTops();
+  drawCasing();
+  
   for (int i=0; i<rooms.length; i++) {
     rooms[i].update();
     rooms[i].render();
   }
-
-  //drawWalls(center, 100, 50, 5);
+  
   drawAxisGizmo(0, -150, 0, 50);
 
-  //text(nf(carrouselRotation  % TWO_PI,0,2),0, -60);
+  text(nf(slitStart, 0, 2) + " | " + nf(slitEnd, 0, 2), 0, -60);
+
+  // SHOWING ROOM ARTWORK
+  hint(DISABLE_DEPTH_TEST);
+  
+  for (int i=0; i<rooms.length; i++) {
+    image(rooms[i].getArtWork(), -300 + (i * 100),- 200, 100,100);
+  }  
+  hint(ENABLE_DEPTH_TEST);
 }
 
-
-void drawWalls(PVector pos, float radius, float wallHeight, float wallWidth) {
-
-  pushMatrix();
-  translate(pos.x, pos.y, pos.z);
-  rotateY(rotationVel);
-
-  // WALL 0
-  pushMatrix();
-  translate(radius * 0.5, -(wallHeight * 0.5), 0); // CUZ BOX IS CONSTRUCTED FROM CENTER
-
-  noFill();
-  stroke(255, 255, 0);
-  box(radius, wallHeight, wallWidth);
-  text("0", radius * 0.5, -(wallHeight * 0.5));
-
-  popMatrix();
-
-  // WALL 1
-  pushMatrix();
-  rotateY(HALF_PI);
-  translate(radius * 0.5, -(wallHeight * 0.5), 0);
-
-  noFill();
-  stroke(255, 255, 0);
-  box(radius, wallHeight, wallWidth);
-  text("1", radius * 0.5, -(wallHeight * 0.5));
-
-  popMatrix();
-
-  // WALL 2  
-  pushMatrix();
-  rotateY(PI);
-  translate(radius * 0.5, -(wallHeight * 0.5), 0);
-
-  noFill();
-  stroke(255, 255, 0);
-  box(radius, wallHeight, wallWidth);
-  text("2", radius * 0.5, -(wallHeight * 0.5));
-
-  popMatrix();
-
-  // WALL 3  
-  pushMatrix();
-  rotateY(PI + HALF_PI);
-  translate(radius * 0.5, -(wallHeight * 0.5), 0);
-
-  noFill();
-  stroke(255, 255, 0);
-  box(radius, wallHeight, wallWidth);
-  text("3", radius * 0.5, -(wallHeight * 0.5));
-
-  popMatrix();
-
-  popMatrix();
-
-  // DRAW BASE
-  pushMatrix();
-  translate(0, 1, 0); // NUDGE IT DOWN A LITTLE BIT
-  rotateX(HALF_PI);
-  stroke(127);
-  fill(0);
-  ellipse(pos.x, pos.y, radius * 2, radius * 2);
-  popMatrix();
-
-  // DRAW TOP PACMAN
-  pushMatrix();
-  translate(0, -1, 0); // NUDGE IT UP A LITTLE BIT
-  translate(0, -wallHeight);
-  rotateX(HALF_PI);
-  stroke(127);
-  fill(0);
-  arc(pos.x, pos.y, radius * 2, radius * 2, HALF_PI + QUARTER_PI, TWO_PI + QUARTER_PI, PIE);
-  popMatrix();
-
-  /*
-  int cylinderRes = 20;
-   beginShape(TRIANGLE_FAN);
-   vertex(0,0,0);
-   for(int i=0; i<cylinderRes;i++){
-   vertex()
-   }
-   endShape(CLOSE);
-   */
-}
-
-void drawTops() {
+void drawCasing() {
   // DRAW BASE
   pushMatrix();
   translate(0, 0.5, 0); // NUDGE IT DOWN A LITTLE BIT
@@ -176,7 +98,7 @@ void drawTops() {
   fill(255, 0, 255);
   stroke(255);
   beginShape(QUAD_STRIP);
-  for (int i=0; i<resolution; i++) {
+  for (int i=0; i<=resolution; i++) {
     float angle = map(i, 0, resolution, slitStart, slitEnd);
     float x = galleryRadius * cos(angle);
     float z = galleryRadius * sin(angle);
@@ -214,12 +136,7 @@ void keyPressed() {
   if (key == ' ') {
     doRotate = !doRotate;
     for (int i=0; i<rooms.length; i++) {
-
-      if (doRotate) {
-        rooms[i].setRotationVelocity(rotationVel);
-      } else {
-        rooms[i].setRotationVelocity(0);
-      }
+      rooms[i].paused = doRotate;
     }
   }
 
