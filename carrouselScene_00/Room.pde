@@ -39,7 +39,7 @@ class Room {
 
   boolean checkActive() {
 
-    if ( (  abs((rotation % TWO_PI)) < abs((slitStart % TWO_PI)) && abs((rotation % TWO_PI)) > abs((slitEnd % TWO_PI)) )) {
+    if ( (  abs((rotation % TWO_PI)) < abs((slitStart + HALF_PI % TWO_PI)) && abs((rotation % TWO_PI)) > abs((slitEnd % TWO_PI)) )) {
       isActive = true;
       if (!changedGraphics) {
         changeGraphics();
