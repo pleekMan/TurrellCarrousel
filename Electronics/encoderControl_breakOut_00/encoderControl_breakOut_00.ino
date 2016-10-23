@@ -23,9 +23,11 @@ void loop(){
   if(digitalRead(clock) == LOW){
     //Serial.print(digitalRead(clock));
     //Serial.print("-");
-    Serial.println(digitalRead(data));
+    Serial.print(digitalRead(data), DEC);
     delay(50);
   }
+  
+  
   
   // NOT WORKING
   /*

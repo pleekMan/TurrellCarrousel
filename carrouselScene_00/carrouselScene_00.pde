@@ -26,7 +26,8 @@ float slitEnd;
 boolean doRotate;
 boolean calibrateMode;
 
-
+Serial serialComm;
+String rotationData;
 
 
 void setup() {
@@ -39,7 +40,7 @@ void setup() {
   camera.setMaximumDistance(1000);
 
   center = new PVector(0, 0, 0);
-  rotationVel = 0.01;
+  rotationVel = TWO_PI / 20.0; // ROTARY ENCODER HAS 20 STEPS IN FULL CIRCLE // TOO LITTLE
   activeWall = 0;
   doRotate = true;
   rotDirection = -1;
@@ -62,16 +63,43 @@ void setup() {
 
   pauseRotation();
 
+  //--------------
   cp5 = new ControlP5(this);
   cp5.setAutoDraw(false);
   cp5.addSlider("radius").setPosition(10, 20).setRange(1, 200).setValue(100);
   cp5.addSlider("height").setPosition(10, 40).setRange(1, 100).setValue(50);
   cp5.addSlider("wall_width").setPosition(10, 60).setRange(1, 30).setValue(5);
   cp5.addKnob("slitAngle").setPosition(30, 80).setRange(0, 180).setSize(80, 80).setValue(45);
+
+  //--------------
+  printArray(Serial.list());
+  serialComm = new Serial(this, Serial.list()[9], 9600);
+  serialComm.clear();
+  rotationData = "";
 }
 
 void draw() {
   background(25);
+
+  // SERIAL COMM - BEGIN
+  
+  if (calibrateMode) {
+    while (serialComm.available () > 0) {
+      rotationData = serialComm.readString(); // 10 = ASCII FOR line feed (or the end of println() in Arduino);
+      //rotationData.trim();
+      print("SERIAL DATA: " + rotationData + " -> ");
+      if (Integer.parseInt(rotationData) == 1) {
+        step(1);
+        println("STEP +");
+      } else {
+        step(-1);
+        println("STEP -");
+      }
+    }
+  }
+  
+  // SERIAL COMM - END
+
 
   drawCasing();
 

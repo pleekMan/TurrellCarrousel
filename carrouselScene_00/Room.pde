@@ -79,7 +79,7 @@ class Room {
     drawBuffer.endDraw();
     changedGraphics = true;
 
-    println("ARTWORK ON ROOM " + id + " CHANGED");
+    //println("ARTWORK ON ROOM " + id + " CHANGED");
   }
 
   void render() {
