@@ -56,8 +56,8 @@ class Room {
     drawBuffer.beginDraw();
     drawBuffer.background(0);
 
-    int shapePoints = floor(random(5));
-    int limit = int(drawBuffer.width * 0.5);
+    //int shapePoints = floor(random(5));
+    //int limit = int(drawBuffer.width * 0.5); //<>//
     drawBuffer.noStroke();
     drawBuffer.fill(random(255), random(255), random(255));
 
@@ -98,7 +98,7 @@ class Room {
     //noFill();
     if(calibrateMode)stroke(255, 255, 0); else{noStroke();}
     box(size.x, size.y, size.z);
-    text(id + " | " + nf(abs((rotation % TWO_PI)), 0, 2), size.x * 0.5, -(size.y * 0.5));
+    //text(id + " | " + nf(abs((rotation % TWO_PI)), 0, 2), size.x * 0.5, -(size.y * 0.5));
 
     popMatrix();
 
@@ -194,12 +194,26 @@ class Room {
   void invertRotation() {
     rotationVel *= -1;
   }
-
+  
+  //-------------- ROOM SHAPE
   void setWalls(PVector _pos, float radius, float wallHeight, float wallWidth, float initRotation) {
     pos.set(_pos);
     rotation = initRotation;
     size.set(radius, wallHeight, wallWidth);
   }
+  
+  void setWallHeight(float h){
+   size.y = h; 
+  }
+  
+  void setWallRadius(float rad){
+   size.x = rad; 
+  }
+  
+  void setWallWidth(float w){
+   size.z = w; 
+  }
+  //-------------------
 
   PImage getArtWork() {
     return drawBuffer;

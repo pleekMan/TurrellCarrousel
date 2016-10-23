@@ -1,4 +1,8 @@
-import peasy.test.*; //<>//
+import processing.serial.*; //<>//
+
+import controlP5.*;
+
+import peasy.test.*;
 import peasy.org.apache.commons.math.*;
 import peasy.*;
 import peasy.org.apache.commons.math.geometry.*;
@@ -8,6 +12,7 @@ PVector center;
 float rotationVel;
 int rotDirection;
 
+ControlP5 cp5;
 
 //WallGraphic graphic1;
 Room[] rooms;
@@ -23,6 +28,7 @@ boolean calibrateMode;
 
 
 
+
 void setup() {
   size(1024, 768, P3D);
   frameRate(30);
@@ -33,12 +39,13 @@ void setup() {
   camera.setMaximumDistance(1000);
 
   center = new PVector(0, 0, 0);
-  rotationVel = 0.1;
+  rotationVel = 0.01;
   activeWall = 0;
   doRotate = true;
   rotDirection = -1;
 
-  calibrateMode = false;
+  calibrateMode = true;
+
 
   galleryRadius = 100;
   galleryHeight = 50;
@@ -54,11 +61,17 @@ void setup() {
   }
 
   pauseRotation();
+
+  cp5 = new ControlP5(this);
+  cp5.setAutoDraw(false);
+  cp5.addSlider("radius").setPosition(10, 20).setRange(1, 200).setValue(100);
+  cp5.addSlider("height").setPosition(10, 40).setRange(1, 100).setValue(50);
+  cp5.addSlider("wall_width").setPosition(10, 60).setRange(1, 30).setValue(5);
+  cp5.addKnob("slitAngle").setPosition(30, 80).setRange(0, 180).setSize(80, 80).setValue(45);
 }
 
 void draw() {
   background(25);
-
 
   drawCasing();
 
@@ -66,19 +79,30 @@ void draw() {
     rooms[i].update();
     rooms[i].render();
   }
+  //text(nf(slitStart, 0, 2) + " | " + nf(slitEnd, 0, 2), 0, -60);
+
+  if (calibrateMode)drawGui();
+}
+
+void drawGui() {
 
   drawAxisGizmo(0, -150, 0, 50);
 
-  text(nf(slitStart, 0, 2) + " | " + nf(slitEnd, 0, 2), 0, -60);
-
-  // SHOWING ROOM ARTWORK
+  // DRAW GUI + OTHER 
   hint(DISABLE_DEPTH_TEST);
-
+  camera.beginHUD();
+  // SHOWING ROOM ARTWORK
   for (int i=0; i<rooms.length; i++) {
-    image(rooms[i].getArtWork(), -300 + (i * 100), - 200, 100, 100);
-  }  
+    image(rooms[i].getArtWork(), 300 + (i * 100), 0, 50, 50);
+  }
+
+  stroke(127);
+  line(200, 0, 200, height);
+  cp5.draw();
+  camera.endHUD();
   hint(ENABLE_DEPTH_TEST);
 }
+
 
 void drawCasing() {
 
@@ -88,7 +112,7 @@ void drawCasing() {
   } else {
     noStroke();
   }
-  
+
   // DRAW BASE
   pushMatrix();
   translate(0, 0.5, 0); // NUDGE IT DOWN A LITTLE BIT
@@ -188,13 +212,76 @@ void loadCamera() {
   camera.setDistance(Double.parseDouble(camData[2]));
 }
 
+void saveGalleryShape() {
+  String[] galleryShape = {
+    galleryRadius + "," + galleryHeight + "," + rooms[0].size.z + "," + cp5.getController("slitAngle").getValue()
+    };
+    saveStrings("data/galleryShape.csv", galleryShape);
+}
+
+void loadGalleryShape() {
+  String[] galleryIn = split(loadStrings("galleryShape.csv")[0], ',');
+
+  setGalleryRadius(Float.parseFloat(galleryIn[0]));
+  setGalleryHeight( Float.parseFloat(galleryIn[1]));
+
+  float galleryWallsWidth = Float.parseFloat(galleryIn[2]);
+  for (int i=0; i<rooms.length; i++) {
+    rooms[i].setWallWidth(galleryWallsWidth);
+  }
+
+  slitStart = HALF_PI + (radians(Float.parseFloat(galleryIn[3])) * 0.5);
+  slitEnd = (TWO_PI + HALF_PI) - (radians(Float.parseFloat(galleryIn[3])) * 0.5);
+
+  cp5.getController("radius").setValue(galleryRadius);
+  cp5.getController("height").setValue(galleryHeight);
+  cp5.getController("wall_width").setValue(galleryWallsWidth);
+  cp5.getController("slitAngle").setValue(Float.parseFloat(galleryIn[3]));
+}
+
+void setGalleryHeight(float h) {
+  galleryHeight = h;
+  for (int i=0; i<rooms.length; i++) {
+    rooms[i].setWallHeight(h);
+  }
+}
+
+void setGalleryRadius(float r) {
+  galleryRadius = r;
+  for (int i=0; i<rooms.length; i++) {
+    rooms[i].setWallRadius(r);
+  }
+}
+
+// CALLBACKS FROM ControlP5
+void height(float value) {
+  setGalleryHeight(value);
+}
+
+void radius(float value) {
+  setGalleryRadius(value);
+}
+
+void wall_width(float value) {
+  for (int i=0; i<rooms.length; i++) {
+    rooms[i].setWallWidth(value);
+  }
+}
+
+void slitAngle(float value) {
+  slitStart = HALF_PI + (radians(value) * 0.5);
+  slitEnd = (TWO_PI + HALF_PI) - (radians(value) * 0.5);
+}
+
+// END CALLBACKS FROM ControlP5
+
 
 
 void keyPressed() {
   if (key == ' ') {
     pauseRotation();
   }
-   if (key == 'c') {
+  if (key == 'c') {
     calibrateMode = !calibrateMode;
   }
 
@@ -208,9 +295,11 @@ void keyPressed() {
 
   if (key == 'l') {
     loadCamera();
+    loadGalleryShape();
   }
   if (key == 's') {
     saveCamera();
+    saveGalleryShape();
   }
 
   if (keyCode == LEFT) {
@@ -222,9 +311,15 @@ void keyPressed() {
 }
 
 void mousePressed() {
+  if (mouseX < 200) {
+    camera.setActive(false);
+  }
 }
 
 void mouseReleased() {
+  if (!camera.isActive()) {
+    camera.setActive(true);
+  }
 }
 
 void mouseClicked() {
