@@ -1,4 +1,4 @@
-class Room {
+class Room { //<>//
 
   PGraphics drawBuffer;
   //PGraphics floorBuffer;
@@ -31,10 +31,14 @@ class Room {
 
     checkActive();
   }
-  
-  void step(int direction){
+
+  void step(int direction) {
     rotationVel = abs(rotationVel) * direction;
     rotation += rotationVel;
+  }
+
+  void stepSmall(float amount) {
+    rotation += amount;
   }
 
   boolean checkActive() {
@@ -56,24 +60,26 @@ class Room {
     drawBuffer.beginDraw();
     drawBuffer.background(0);
 
-    //int shapePoints = floor(random(5));
-    //int limit = int(drawBuffer.width * 0.5); //<>//
+    int shapePoints = floor(random(3,6));
+    int limit = int(drawBuffer.width * 0.85);
     drawBuffer.noStroke();
     drawBuffer.fill(random(255), random(255), random(255));
 
-    drawBuffer.rectMode(CENTER);
-    drawBuffer.rect(drawBuffer.width * 0.5, drawBuffer.height * 0.5, 100, 100);
-    drawBuffer.rectMode(CORNER);
+    //drawBuffer.rectMode(CENTER);
+    //drawBuffer.rect(drawBuffer.width * 0.5, drawBuffer.height * 0.5, 100, 100);
+    //drawBuffer.rectMode(CORNER);
 
-    /*
+
     drawBuffer.beginShape();
-     
-     for (int i=0; i < shapePoints; i++) {
-     drawBuffer.vertex(drawBuffer.width * 0.5 + random(-limit, limit), drawBuffer.height * 0.5 + random(-limit, limit));
-     }
-     
-     drawBuffer.endShape();
-     */
+
+    for (int i=0; i < shapePoints; i++) {
+      //drawBuffer.vertex(drawBuffer.width * 0.5 + random(-limit, limit), drawBuffer.height * 0.5 + random(-limit, limit));
+      drawBuffer.vertex(random(drawBuffer.width), random(drawBuffer.height));
+  
+  }
+
+    drawBuffer.endShape(CLOSE);
+
 
 
     drawBuffer.endDraw();
@@ -84,7 +90,7 @@ class Room {
 
   void render() {
     fill(0);
-    
+
     pushMatrix();
     //translate(pos.x, pos.y, pos.z);
     rotateY(rotation);
@@ -96,7 +102,10 @@ class Room {
     translate(size.x * 0.5, -(size.y * 0.5), 0); // CUZ BOX IS CONSTRUCTED FROM CENTER
 
     //noFill();
-    if(calibrateMode)stroke(255, 255, 0); else{noStroke();}
+    if (calibrateMode)stroke(255, 255, 0); 
+    else {
+      noStroke();
+    }
     box(size.x, size.y, size.z);
     //text(id + " | " + nf(abs((rotation % TWO_PI)), 0, 2), size.x * 0.5, -(size.y * 0.5));
 
@@ -163,11 +172,11 @@ class Room {
     PVector wall2 = new PVector(0 + wallHalfWidthOffset, 0, -size.x);
     /*
     if (isActive) {
-      fill(0, 200, 200);
-    } else {
-      fill(127);
-    }
-    */
+     fill(0, 200, 200);
+     } else {
+     fill(127);
+     }
+     */
     beginShape();
     texture(drawBuffer);
     vertex(corner.x, corner.y, corner.z, 0.5, 0.5);
@@ -194,24 +203,24 @@ class Room {
   void invertRotation() {
     rotationVel *= -1;
   }
-  
+
   //-------------- ROOM SHAPE
   void setWalls(PVector _pos, float radius, float wallHeight, float wallWidth, float initRotation) {
     pos.set(_pos);
     rotation = initRotation;
     size.set(radius, wallHeight, wallWidth);
   }
-  
-  void setWallHeight(float h){
-   size.y = h; 
+
+  void setWallHeight(float h) {
+    size.y = h;
   }
-  
-  void setWallRadius(float rad){
-   size.x = rad; 
+
+  void setWallRadius(float rad) {
+    size.x = rad;
   }
-  
-  void setWallWidth(float w){
-   size.z = w; 
+
+  void setWallWidth(float w) {
+    size.z = w;
   }
   //-------------------
 

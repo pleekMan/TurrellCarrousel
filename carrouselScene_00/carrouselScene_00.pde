@@ -31,7 +31,7 @@ String rotationData;
 
 
 void setup() {
-  size(1024, 768, P3D);
+  size(1280, 800, P3D);
   frameRate(30);
   textureMode(NORMAL);
 
@@ -40,7 +40,7 @@ void setup() {
   camera.setMaximumDistance(1000);
 
   center = new PVector(0, 0, 0);
-  rotationVel = TWO_PI / 20.0; // ROTARY ENCODER HAS 20 STEPS IN FULL CIRCLE // TOO LITTLE
+  rotationVel = TWO_PI / 20.0; // ROTARY ENCODER HAS 20 STEPS IN FULL CIRCLE // TOO LITTLE :(
   activeWall = 0;
   doRotate = true;
   rotDirection = -1;
@@ -66,8 +66,8 @@ void setup() {
   //--------------
   cp5 = new ControlP5(this);
   cp5.setAutoDraw(false);
-  cp5.addSlider("radius").setPosition(10, 20).setRange(1, 200).setValue(100);
-  cp5.addSlider("height").setPosition(10, 40).setRange(1, 100).setValue(50);
+  cp5.addSlider("radius").setPosition(10, 20).setRange(1, 300).setValue(100);
+  cp5.addSlider("height").setPosition(10, 40).setRange(1, 200).setValue(50);
   cp5.addSlider("wall_width").setPosition(10, 60).setRange(1, 30).setValue(5);
   cp5.addKnob("slitAngle").setPosition(30, 80).setRange(0, 180).setSize(80, 80).setValue(45);
 
@@ -83,7 +83,7 @@ void draw() {
 
   // SERIAL COMM - BEGIN
   
-  if (calibrateMode) {
+  //if (calibrateMode) {
     while (serialComm.available () > 0) {
       rotationData = serialComm.readString(); // 10 = ASCII FOR line feed (or the end of println() in Arduino);
       //rotationData.trim();
@@ -96,7 +96,7 @@ void draw() {
         println("STEP -");
       }
     }
-  }
+  //}
   
   // SERIAL COMM - END
 
@@ -121,7 +121,7 @@ void drawGui() {
   camera.beginHUD();
   // SHOWING ROOM ARTWORK
   for (int i=0; i<rooms.length; i++) {
-    image(rooms[i].getArtWork(), 300 + (i * 100), 0, 50, 50);
+    image(rooms[i].getArtWork(), 300 + (i * 100) + 3, 0, 100, 100);
   }
 
   stroke(127);
@@ -192,6 +192,13 @@ public void step(int direction) {
     rooms[i].step(direction);
   }
 }
+
+public void stepSmall(float amount) {
+  for (int i=0; i<rooms.length; i++) {
+    rooms[i].stepSmall(amount);
+  }
+}
+
 
 public void drawAxisGizmo(float x, float y, float z, float gizmoSize) {
   pushMatrix();
@@ -331,10 +338,10 @@ void keyPressed() {
   }
 
   if (keyCode == LEFT) {
-    step(-1);
+    stepSmall(-TWO_PI * 0.005);
   }
   if (keyCode == RIGHT) {
-    step(1);
+    stepSmall(TWO_PI * 0.005);
   }
 }
 
